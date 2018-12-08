@@ -6,7 +6,21 @@ const clientID = config.clientID
 const clientSecret = config.clientSecret
 const url = 'https://apis.discover.com/auth/oauth/v2/token'
 
+router.post('/', (req, res) => {
+    console.log('ssss', req.body)
+    const lat = req.body.lat
+    const long = req.body.long
+    const radius = req.body.radius || 30
+    atm(req, res, lat, long, radius)
+})
 router.get('/', (req, res) => {
+    const lat = req.query.lat
+    const long = req.query.long
+    const radius = req.query.radius || 30
+    atm(req, res, lat, long, radius)
+})
+const atm = (req, res, lat, long, radius) => {
+
     const requestToken = req.query.code
     axios({
         method: 'post',
@@ -15,9 +29,12 @@ router.get('/', (req, res) => {
             accept: 'application/json'
         }
     }).then((response) => {
+        console.log('x', lat, long, radius)
         const accessToken = response.data.access_token
         var url = 'https://api.discover.com/dci/atm/v1/locations';
-        var queryParams = '?' + encodeURIComponent('radius') + '=' + encodeURIComponent('121') + '&' + encodeURIComponent('longitude') + '=' + encodeURIComponent('-122.419') + '&' + encodeURIComponent('latitude') + '=' + encodeURIComponent('43.111');
+        var queryParams = '?' + encodeURIComponent('radius') + '=' + encodeURIComponent(radius) + '&' +
+            encodeURIComponent('longitude') + '=' + encodeURIComponent(long) + '&' + encodeURIComponent('latitude') +
+            '=' + encodeURIComponent(lat);
         axios({
             method: 'get',
             url: `${url}${queryParams}`,
@@ -27,11 +44,13 @@ router.get('/', (req, res) => {
                 'Authorization': `Bearer ${accessToken}`
             }
         }).then(response => {
-            console.log('success', response.data)
             res.send(response.data);
-            // response.render('index', { title: 'XXX' });
         })
     }).catch(err => { console.log('error', err) })
-})
-
+}
 module.exports = router;
+
+/* 
+curl -d '{"lat":"43.33","long":"-123.333"}' -H "Content-Type: application/json" -X POST http://localhost:3000/atm
+
+*/
