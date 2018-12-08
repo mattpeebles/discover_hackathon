@@ -29,6 +29,7 @@ router.get('/', (req, res) => {
         }).then(response => {
             console.log('success', response.data)
             res.send(response.data);
+            // response.render('index', { title: 'XXX' });
         })
     }).catch(err => { console.log('error', err) })
 })
