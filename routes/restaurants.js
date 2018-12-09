@@ -6,7 +6,7 @@ const client = yelp.client(config.yelpkey);
 
 const priceRange = require('../configPrices')
 
-function getPrices(country,pricestring) {
+function getPrices(country, pricestring) {
     return priceRange[country][pricestring];
 }
 
@@ -27,8 +27,14 @@ const restaurants = (req, res, lat, long, radius, type) => {
     }).then(response => {
 
         var restaurantsList = response.jsonBody.businesses.map(function (business) {
-            
-            var prices= getPrices(business.location.country,business.price)
+
+            if (!business.price) {
+                business.minprice = 0
+                business.maxprice = 0
+                return business
+            }
+
+            var prices = getPrices(business.location.country, business.price)
             business.minprice = prices.min
             business.maxprice = prices.max
 
