@@ -4,25 +4,7 @@ const config = require('../config')
 const yelp = require('yelp-fusion');
 const client = yelp.client(config.yelpkey);
 
-const priceRange = {
-    GB: {'£': {
-            min: 0,
-            max: 10
-        },
-        '££': {
-            min: 11,
-            max: 25
-        },
-        '£££': {
-            min: 26,
-            max: 45
-        },
-        '££££': {
-            min: 46,
-            max: 0
-        },
-    }
-}
+const priceRange = require('../configPrices')
 
 function getPrices(country,pricestring) {
     return priceRange[country][pricestring];
