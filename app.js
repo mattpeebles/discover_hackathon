@@ -7,6 +7,7 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 let atmRouter = require('./routes/atm')
+let currConvRouter = require('./routes/curr-conv')
 
 var app = express();
 
@@ -23,6 +24,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/atm', atmRouter);
+app.use('/curr-conv', currConvRouter);
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
