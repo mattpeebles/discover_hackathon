@@ -1,4 +1,4 @@
-async function addLocationHtml(el, loc, tipInfo){
+async function addLocationHtml(el, loc, tipInfo) {
     var symbol = await getCountry(loc.location.country);
     var priceLevel = loc.price.length;
     var price = "";
@@ -6,22 +6,22 @@ async function addLocationHtml(el, loc, tipInfo){
 
     console.log(loc.price.length)
 
-    if(tipInfoForRestaurant.tipPercentage != null){
+    if (tipInfoForRestaurant.tipPercentage != null) {
         loc.minprice = loc.minprice * parseInt(tipInfoForRestaurant.tipPercentage);
         loc.maxprice = loc.maxprice * parseInt(tipInfoForRestaurant.tipPercentage);
     }
 
-    if(tipInfoForRestaurant.flatRate != null){
+    if (tipInfoForRestaurant.flatRate != null) {
         loc.minprice = loc.minprice + parseInt(tipInfoForRestaurant.tipPercentage);
         loc.maxprice = loc.maxprice + parseInt(tipInfoForRestaurant.tipPercentage);
     }
 
-    if(tipInfoForRestaurant.isIncluded) //do something
-    
-    var price = getPriceLevelString(loc.minprice, loc.maxprice, symbol.symbol);
+    if (tipInfoForRestaurant.isIncluded) //do something
 
-    var html = 
-    `<div class="container">
+        var price = getPriceLevelString(loc.minprice, loc.maxprice, symbol.symbol);
+
+    var html =
+        `<div class="container">
         <div class="row">
             <h5>${loc.name}</h5>
         </div>
@@ -42,26 +42,26 @@ async function addLocationHtml(el, loc, tipInfo){
 
 }
 
-function getPriceLevelString(minPrice, maxPrice, symbol){
+function getPriceLevelString(minPrice, maxPrice, symbol) {
     var price = ""
 
-    if(minPrice == 0 && maxPrice == 0){
+    if (minPrice == 0 && maxPrice == 0) {
         price = "";
     }
-    else if(maxPrice == 0){
+    else if (maxPrice == 0) {
         price += `${symbol}<span class="price" data-price="${minPrice}">${minPrice}+<span>`;
     }
-    else if(minPrice == 0){
+    else if (minPrice == 0) {
         price += `<${symbol}<span class="price" data-price="${maxPrice}">${maxPrice}</span>`;
     }
-    else{
+    else {
         price += `${symbol}<span class="price data-price="${maxPrice}">${minPrice}</span> - ${symbol}<span class="price" data-price="${maxPrice}">${maxPrice}</span>`;
     }
 
     return price
 }
 
-function getTipPerc(loc){
+function getTipPerc(loc) {
     return new Promise((res, rej) => {
         $.get(`/tips/country/${loc}`).then(tip => {
             return res(tip);
@@ -69,27 +69,27 @@ function getTipPerc(loc){
     })
 }
 
-function parseTipObject(tipJson){
+function parseTipObject(tipJson) {
     var result = {};
-    
+
     tipJson.forEach(tip => {
         var isTip = tip.tipClassificationDesc == "Percentage";
         var isFlat = tip.tipClassificationDesc == "Flat Rate";
         var isIncluded = tip.tipClassificationDesc == "Service Charge Included";
 
-        
+
         result[tip.tipCategoryDesc.replace(/\s/g, '')] = {
-            tipPercentage : isTip ? tip.defaultTipAmount : null,
+            tipPercentage: isTip ? tip.defaultTipAmount : null,
             flatRate: isFlat ? tip.defaulTipAmount : null,
-            isIncluded : isIncluded
+            isIncluded: isIncluded
         };
 
-    })    
+    })
     return result;
 
 }
 
-function getMapKey(){
+function getMapKey() {
     return new Promise((res, rej) => {
         $.get('/openMapGl').then(key => {
             return res(key);
@@ -97,29 +97,28 @@ function getMapKey(){
     })
 }
 
-async function getPriceLevels(locations, tipInfo)
-{
-   var tiers = []
-   var symbol = await getCountry(locations[0].location.country);
+async function getPriceLevels(locations, tipInfo) {
+    var tiers = []
+    var symbol = await getCountry(locations[0].location.country);
 
-   var tierInfo = locations.reduce((a, b) => {
-        
-        if(!a.has(b.price.length)){
+    var tierInfo = locations.reduce((a, b) => {
+
+        if (!a.has(b.price.length)) {
             a.add(b.price.length)
-            tiers.push({ tier: b.price.length, min: b.minprice, max: b.maxprice})
+            tiers.push({ tier: b.price.length, min: b.minprice, max: b.maxprice })
         }
-    
-       return a 
+
+        return a
     }, new Set())
-   
+
     console.log(tiers)
 
-   tiers.sort((a, b) => a.tier - b.tier).forEach(tier => {
-    var priceLevel = tier.tier;
-    var priceString = getPriceLevelString(tier.min, tier.max, symbol.symbol)
+    tiers.sort((a, b) => a.tier - b.tier).forEach(tier => {
+        var priceLevel = tier.tier;
+        var priceString = getPriceLevelString(tier.min, tier.max, symbol.symbol)
 
 
-    var html = `
+        var html = `
         <p>
         <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#priceLevel${priceLevel}" aria-expanded="false" aria-controls="collapseExample">
             ${priceString}
@@ -131,13 +130,13 @@ async function getPriceLevels(locations, tipInfo)
         </div>`
 
         $('#actualResults').append(html);
-   })
-   
-    locations.map(loc => addLocationHtml( $("#actualResults"), loc, tipInfo));
+    })
+
+    locations.map(loc => addLocationHtml($("#actualResults"), loc, tipInfo));
 
 }
 
-function getCountry(countryCode){
+function getCountry(countryCode) {
     return new Promise((res, rej) => {
         $.get(`/curr-conv/${countryCode}`).then(key => {
             return res(key);
@@ -145,7 +144,7 @@ function getCountry(countryCode){
     })
 }
 
-function getResults(){
+function getResults() {
     return new Promise((res, rej) => {
         $.get(`/restaurants`).then(results => {
             return res(results);
@@ -153,23 +152,82 @@ function getResults(){
     })
 }
 
-function setUpMap(lat, long){
-    new mapboxgl.Map({
+function setUpMap(lat, long) {
+    const map = new mapboxgl.Map({
         container: 'map', // container id
         style: 'mapbox://styles/mapbox/streets-v9', // stylesheet location
         center: [lat, long], // starting position [lng, lat]
         zoom: 9 // starting zoom
     });
+
+    var popup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false
+    });
+    console.log('a')
+    map.on('load', function () {
+        console.log('b')
+
+        // Add a layer showing the places.
+        map.addLayer({
+            "id": "places",
+            "type": "symbol",
+            "source": {
+                "type": "geojson",
+                "data": {
+                    "type": "FeatureCollection",
+                    "features": [{
+                        "type": "Feature",
+                        "properties": {
+                            "description": "<strong>ATM</strong><p>ATM</p>",
+                            "icon": "star"
+                        },
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [0, 51.5074]
+                        }
+                    },]
+                }
+            },
+            "layout": {
+                "icon-image": "{icon}-15",
+                "icon-allow-overlap": true
+            }
+        });
+
+
+        map.on('mouseenter', 'places', function (e) {
+            console.log('c')
+
+            map.getCanvas().style.cursor = 'pointer';
+            var coordinates = e.features[0].geometry.coordinates.slice();
+            var description = e.features[0].properties.description;
+            while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+            }
+            console.log('z', coordinates, description)
+            popup.setLngLat(coordinates)
+                .setHTML(description)
+                .addTo(map);
+        });
+
+        map.on('mouseleave', 'places', function () {
+            map.getCanvas().style.cursor = '';
+            popup.remove();
+        });
+
+    })
+
 }
 
 $(document).ready(async () => {
 
     mapboxgl.accessToken = await Promise.resolve(getMapKey());
-    
+
     var locations = await getResults();
     var firstResult = locations[0];
     var country = (await getCountry(firstResult.location.country)).countryName;
-    
+
     var tips = parseTipObject(await getTipPerc(country));
 
     var firstResultLocation = firstResult.coordinates;
@@ -180,7 +238,7 @@ $(document).ready(async () => {
 
     $(function () {
         $('[data-toggle="tooltip"]').tooltip()
-      })
+    })
     // $("#basicForm").on("change", e => {
     //    $("#basicForm").submit();
     // })
