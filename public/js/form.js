@@ -42,6 +42,12 @@ async function addLocationHtml(loc, tipInfo){
 
 }
 
+function getAtms(lat, long, radius){
+    return new Promise((res, rej) => {
+        $.get(`/atm?lat=${lat}&long=${long}&radius=${radius}`).then(_ => res(_));
+    })
+}
+
 function getPriceLevelString(minPrice, maxPrice, symbol, convRate){
     var price = ""
     minPrice = Math.ceil(convRate * minPrice);
@@ -245,6 +251,8 @@ $(document).ready(async () => {
     getPriceLevels(locations, tips)
 
     setUpMap(firstResultLocation.longitude, firstResultLocation.latitude);
+    var atms = await getAtms(firstResultLocation.longitude, firstResultLocation.latitude, 300);
+    console.log(atms)
 
     $(function () {
         $('[data-toggle="tooltip"]').tooltip()
