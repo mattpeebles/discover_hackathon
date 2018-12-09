@@ -12,25 +12,14 @@ async function addLocationHtml(el, loc, tipInfo){
     }
 
     if(tipInfoForRestaurant.flatRate != null){
-        loc.minprice = loc.minrice + parseInt(tipInfoForRestaurant.tipPercentage);
+        loc.minprice = loc.minprice + parseInt(tipInfoForRestaurant.tipPercentage);
         loc.maxprice = loc.maxprice + parseInt(tipInfoForRestaurant.tipPercentage);
     }
 
     if(tipInfoForRestaurant.isIncluded) //do something
-
-    if(loc.minPrice == 0 && loc.maxprice == 0){
-        price = "";
-    }
-    else if(loc.maxprice == 0){
-        price += `${symbol.symbol}<span class="price" data-price="${loc.minprice}">${loc.minprice}+<span>`;
-    }
-    else if(loc.minprice == 0){
-        price += `<${symbol.symbol}<span class="price" data-price="${loc.maxprice}">${loc.maxprice}</span>`;
-    }
-    else{
-        price += `${symbol.symbol}<span class="price data-price="${loc.minprice}">${loc.minprice}</span> - ${symbol.symbol}<span class="price" data-price="${loc.maxprice}">${loc.maxprice}</span>`;
-    }
     
+    var price = getPriceLevelString(loc.minprice, loc.maxprice, symbol.symbol);
+
     var html = 
     `<div class="container">
         <div class="row">
@@ -51,6 +40,25 @@ async function addLocationHtml(el, loc, tipInfo){
 
     $(`#priceLevel${priceLevel}Results`).append(html);
 
+}
+
+function getPriceLevelString(minPrice, maxPrice, symbol){
+    var price = ""
+
+    if(minPrice == 0 && maxPrice == 0){
+        price = "";
+    }
+    else if(maxPrice == 0){
+        price += `${symbol}<span class="price" data-price="${minPrice}">${minPrice}+<span>`;
+    }
+    else if(minPrice == 0){
+        price += `<${symbol}<span class="price" data-price="${maxPrice}">${maxPrice}</span>`;
+    }
+    else{
+        price += `${symbol}<span class="price data-price="${maxPrice}">${minPrice}</span> - ${symbol}<span class="price" data-price="${maxPrice}">${maxPrice}</span>`;
+    }
+
+    return price
 }
 
 function getTipPerc(loc){
@@ -89,26 +97,36 @@ function getMapKey(){
     })
 }
 
-function getPriceLevels(locations, tipInfo)
+async function getPriceLevels(locations, tipInfo)
 {
    var tiers = []
-   locations.reduce((a, b) => a.add(b.price.length), new Set()).forEach(level => tiers.push(level) )
-   
-   console.log(tiers.sort());
+   var symbol = await getCountry(locations[0].location.country);
+
+   var tierInfo = locations.reduce((a, b) => {
+        
+        if(!a.has(b.price.length)){
+            a.add(b.price.length)
+            tiers.push({ tier: b.price.length, min: b.minprice, max: b.maxprice})
+        }
     
-   tiers.forEach(priceLevel => {
+       return a 
+    }, new Set())
+   
+    console.log(tiers)
+
+   tiers.sort((a, b) => a.tier - b.tier).forEach(tier => {
+    var priceLevel = tier.tier;
+    var priceString = getPriceLevelString(tier.min, tier.max, symbol.symbol)
+
+
     var html = `
         <p>
-            <a class="btn btn-primary" data-toggle="collapse" href="#${priceLevel}" role="button" aria-expanded="false" aria-controls="${priceLevel}">
-                Link with href
-            </a>
-            <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#${priceLevel}" aria-expanded="false" aria-controls="${priceLevel}">
-                Button with data-target
-            </button>
+        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#priceLevel${priceLevel}" aria-expanded="false" aria-controls="collapseExample">
+            ${priceString}
+        </button>
         </p>
-        <div class="collapse" id="priceLevel0">
+        <div class="collapse" id="priceLevel${priceLevel}">
         <div class="card card-body" id="priceLevel${priceLevel}Results">
-            Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident.
         </div>
         </div>`
 
