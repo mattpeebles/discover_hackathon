@@ -231,9 +231,12 @@ function setUpMap(lat, long) {
 }
 
 async function init(city){
+    
     var locations = await getResults(city.lat, city.long, 7000);
     var firstResult = locations[0];
     
+    $("#results").removeClass("hidden");
+
     var country = (await getCountry(firstResult.location.country)).countryName;
 
     var tips = parseTipObject(await getTipPerc(country));
@@ -276,6 +279,8 @@ $(document).ready(async () => {
         $('[data-toggle="tooltip"]').tooltip()
     })
     $("#basicForm").on("change", async e => {
+        $("#results").addClass("hidden");
+
         var city = $("#formLocation").find(":selected").text();
         var cityCoord = coordinates[city]
         await init(cityCoord);
