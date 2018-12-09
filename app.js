@@ -9,6 +9,7 @@ var usersRouter = require('./routes/users');
 let atmRouter = require('./routes/atm')
 let currConvRouter = require('./routes/curr-conv')
 let restaurantsRouter = require('./routes/restaurants');
+let tipsRouter = require('./routes/tips');
 
 var app = express();
 
@@ -27,6 +28,7 @@ app.use('/users', usersRouter);
 app.use('/atm', atmRouter);
 app.use('/curr-conv', currConvRouter);
 app.use('/restaurants', restaurantsRouter);
+app.use('/tips', tipsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
