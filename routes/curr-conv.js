@@ -17,7 +17,7 @@ router.get('/', (req, res) => {
     currConv(req, res, currencyTo)
 })
 
-router.get('/:countryCode*', (req, res) => {
+router.get('/info/:countryCode*', (req, res) => {
     var code = req.param('countryCode');
     var countryInfo = countryCurrency.getAllInfoByISO(code);
     console.log(code);

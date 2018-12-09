@@ -1,10 +1,8 @@
-async function addLocationHtml(el, loc, tipInfo){
+async function addLocationHtml(loc, tipInfo){
     var symbol = await getCountry(loc.location.country);
     var priceLevel = loc.price.length;
     var price = "";
     var tipInfoForRestaurant = tipInfo.Restaurant;
-
-    console.log(loc.price.length)
 
     if(tipInfoForRestaurant.tipPercentage != null){
         loc.minprice = loc.minprice * parseInt(tipInfoForRestaurant.tipPercentage);
@@ -18,7 +16,7 @@ async function addLocationHtml(el, loc, tipInfo){
 
     if(tipInfoForRestaurant.isIncluded) //do something
     
-    var price = getPriceLevelString(loc.minprice, loc.maxprice, symbol.symbol);
+    var price = getPriceLevelString(loc.minprice, loc.maxprice, symbol.symbol, 1);
 
     var html = 
     `<div class="container">
@@ -42,8 +40,11 @@ async function addLocationHtml(el, loc, tipInfo){
 
 }
 
-function getPriceLevelString(minPrice, maxPrice, symbol){
+function getPriceLevelString(minPrice, maxPrice, symbol, convRate){
     var price = ""
+    minPrice = Math.ceil(convRate * minPrice);
+    maxPrice = Math.ceil(convRate * maxPrice);
+
 
     if(minPrice == 0 && maxPrice == 0){
         price = "";
@@ -66,6 +67,12 @@ function getTipPerc(loc){
         $.get(`/tips/country/${loc}`).then(tip => {
             return res(tip);
         })
+    })
+}
+
+function convRate(countryCurrCode){
+    return new Promise((res, rej) => {
+        $.get(`/curr-conv?currencyto=${countryCurrCode}`).then(result => res(result))
     })
 }
 
@@ -100,7 +107,7 @@ function getMapKey(){
 async function getPriceLevels(locations, tipInfo)
 {
    var tiers = []
-   var symbol = await getCountry(locations[0].location.country);
+   var countryInfo = await getCountry(locations[0].location.country);
 
    var tierInfo = locations.reduce((a, b) => {
         
@@ -112,12 +119,12 @@ async function getPriceLevels(locations, tipInfo)
        return a 
     }, new Set())
    
-    console.log(tiers)
+   var conversionRate = await convRate(countryInfo.currency);
 
-   tiers.sort((a, b) => a.tier - b.tier).forEach(tier => {
+   tiers.sort((a, b) => a.tier - b.tier).forEach(async tier => {
     var priceLevel = tier.tier;
-    var priceString = getPriceLevelString(tier.min, tier.max, symbol.symbol)
 
+    var priceString = getPriceLevelString(tier.min, tier.max, "$", conversionRate.exchange_rate)
 
     var html = `
         <p>
@@ -133,13 +140,13 @@ async function getPriceLevels(locations, tipInfo)
         $('#actualResults').append(html);
    })
    
-    locations.map(loc => addLocationHtml( $("#actualResults"), loc, tipInfo));
+    locations.map(loc => addLocationHtml(loc, tipInfo));
 
 }
 
 function getCountry(countryCode){
     return new Promise((res, rej) => {
-        $.get(`/curr-conv/${countryCode}`).then(key => {
+        $.get(`/curr-conv/info/${countryCode}`).then(key => {
             return res(key);
         })
     })
