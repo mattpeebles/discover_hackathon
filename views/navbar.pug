@@ -1,0 +1,15 @@
+nav#bottomNav.navbar.navbar-light.bg-light
+  form#basicForm.form-inline(action='/basic', method='POST')
+    #navbarSupportedContent.collapse.navbar-collapse
+      .form-check
+        input#tippingOption.form-check-input(type='checkbox')
+        label.form-check-label(for='tippingOption')
+          | Include Local Tipping 
+          span(data-toggle='tooltip', data-placement='top', title='Tooltip on top') *
+      p.navbar-text
+        | Local Currency: 
+        span(id='#localCurrency')
+    .input-group
+      input.form-control(type='search', placeholder='Location', aria-label='Location')
+      button.input-group-append.navbar-toggler(type='button', data-toggle='collapse', data-target='#navbarSupportedContent', aria-controls='navbarSupportedContent', aria-expanded='false', aria-label='Toggle navigation')
+        img(src='./assets/icons/cog.svg', style='height: 18px;')
