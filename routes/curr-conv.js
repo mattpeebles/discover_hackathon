@@ -2,6 +2,8 @@ var express = require('express');
 var router = express.Router();
 const axios = require('axios')
 const config = require('../config')
+const countryCurrency = require('iso-country-currency');
+
 const clientID = config.clientID
 const clientSecret = config.clientSecret
 const url = 'https://apis.discover.com/auth/oauth/v2/token'
@@ -14,6 +16,15 @@ router.get('/', (req, res) => {
     const currencyTo = req.query.currencyto
     currConv(req, res, currencyTo)
 })
+
+router.get('/:countryCode*', (req, res) => {
+    var code = req.param('countryCode');
+    var countryInfo = countryCurrency.getAllInfoByISO(code);
+    console.log(code);
+    console.log(countryInfo)
+    res.send(countryInfo);
+})
+
 const currConv = (req, res, currencyTo) => {
     console.log('currencyTo: ', currencyTo)
     axios({

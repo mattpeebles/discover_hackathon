@@ -16,6 +16,9 @@ body { margin:0; padding:0; }
   z-index: -1000;
 }
 
+#actualResults{
+  overflow: auto;
+}
 
 /* navbar */
 #bottomNav{
@@ -29,6 +32,8 @@ body { margin:0; padding:0; }
   position: absolute;
   bottom: 12%;
   right: 2%;
+  overflow: scroll;
+  max-height: 75%;
 } 
 
 @media only screen and (max-width: 600px) {
