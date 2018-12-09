@@ -18,8 +18,6 @@ async function addLocationHtml(loc, tipInfo){
     
     var price = getPriceLevelString(loc.minprice, loc.maxprice, symbol.symbol, 1);
 
-        var price = getPriceLevelString(loc.minprice, loc.maxprice, symbol.symbol);
-
     var html =
         `<div class="container">
         <div class="row">
@@ -52,7 +50,6 @@ function getPriceLevelString(minPrice, maxPrice, symbol, convRate){
     var price = ""
     minPrice = Math.ceil(convRate * minPrice);
     maxPrice = Math.ceil(convRate * maxPrice);
-
 
     if (minPrice == 0 && maxPrice == 0) {
         price = "";
@@ -128,6 +125,7 @@ async function getPriceLevels(locations, tipInfo)
 }, new Set())
    
    var conversionRate = await convRate(countryInfo.currency);
+   $('#actualResults').empty();
 
    tiers.sort((a, b) => a.tier - b.tier).forEach(async tier => {
     var priceLevel = tier.tier;
@@ -160,9 +158,9 @@ function getCountry(countryCode) {
     })
 }
 
-function getResults() {
+function getResults(lat, long, radius) {
     return new Promise((res, rej) => {
-        $.get(`/restaurants`).then(results => {
+        $.get(`/restaurants?lat=${lat}&long=${long}&radius=${radius}`).then(results => {
             return res(results);
         })
     })
@@ -180,9 +178,7 @@ function setUpMap(lat, long) {
         closeButton: false,
         closeOnClick: false
     });
-    console.log('a')
     map.on('load', function () {
-        console.log('b')
 
         // Add a layer showing the places.
         map.addLayer({
@@ -213,7 +209,6 @@ function setUpMap(lat, long) {
 
 
         map.on('mouseenter', 'places', function (e) {
-            console.log('c')
 
             map.getCanvas().style.cursor = 'pointer';
             var coordinates = e.features[0].geometry.coordinates.slice();
@@ -221,7 +216,6 @@ function setUpMap(lat, long) {
             while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
                 coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
             }
-            console.log('z', coordinates, description)
             popup.setLngLat(coordinates)
                 .setHTML(description)
                 .addTo(map);
@@ -236,12 +230,10 @@ function setUpMap(lat, long) {
 
 }
 
-$(document).ready(async () => {
-
-    mapboxgl.accessToken = await Promise.resolve(getMapKey());
-
-    var locations = await getResults();
+async function init(city){
+    var locations = await getResults(city.lat, city.long, 7000);
     var firstResult = locations[0];
+    
     var country = (await getCountry(firstResult.location.country)).countryName;
 
     var tips = parseTipObject(await getTipPerc(country));
@@ -252,12 +244,40 @@ $(document).ready(async () => {
 
     setUpMap(firstResultLocation.longitude, firstResultLocation.latitude);
     var atms = await getAtms(firstResultLocation.longitude, firstResultLocation.latitude, 300);
-    console.log(atms)
+}
+
+var coordinates = {
+    "Paris" : {
+        lat: 48.864716,
+        long: 2.349014
+    },
+    "Berlin": {
+        lat: 52.520008,
+        long: 13.404954
+    },
+    "London" :{
+        lat: 51.509865,
+        long: -0.118092
+    },
+    "New York" : {
+        lat: 40.730610,
+        long: -73.935242
+    }
+
+}
+
+$(document).ready(async () => {
+
+    mapboxgl.accessToken = await Promise.resolve(getMapKey());
+
+    await init(coordinates["London"]);
 
     $(function () {
         $('[data-toggle="tooltip"]').tooltip()
     })
-    // $("#basicForm").on("change", e => {
-    //    $("#basicForm").submit();
-    // })
+    $("#basicForm").on("change", async e => {
+        var city = $("#formLocation").find(":selected").text();
+        var cityCoord = coordinates[city]
+        await init(cityCoord);
+    })
 })

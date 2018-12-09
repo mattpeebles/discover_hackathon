@@ -12,10 +12,10 @@ function getPrices(country, pricestring) {
 
 router.get('/', (req, res) => {
 
-    const lat = req.body.lat || 51.528308
-    const long = req.body.long || -0.171663
-    const radius = req.body.radius || 7000
-    const type = req.body.type || 'lunch'
+    const lat = req.query.lat || 51.528308
+    const long = req.query.long || -0.171663
+    const radius = req.query.radius || 7000
+    const type = req.query.type || 'lunch'
     restaurants(req, res, lat, long, radius, type)
 })
 const restaurants = (req, res, lat, long, radius, type) => {

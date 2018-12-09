@@ -10,6 +10,9 @@ nav#bottomNav.navbar.navbar-light.bg-light
         | Local Currency: 
         span(id='#localCurrency')
     .input-group
-      input.form-control(type='search', placeholder='Location', aria-label='Location')
+      select.form-control(id="formLocation")
+        option(value="0") London
+        option(value="1") Paris
+        option(value="2") Berlin
       button.input-group-append.navbar-toggler(type='button', data-toggle='collapse', data-target='#navbarSupportedContent', aria-controls='navbarSupportedContent', aria-expanded='false', aria-label='Toggle navigation')
         img(src='./assets/icons/cog.svg', style='height: 18px;')
